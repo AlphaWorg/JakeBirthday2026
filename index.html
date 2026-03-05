@@ -55,19 +55,11 @@
             transform-origin: center center;
             display: inline-block;
         }
-        .atmosphere-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #1a0524 0%, #000000 70%);
-            z-index: -1;
-        }
     </style>
 </head>
 <body class="bg-black text-white">
 
     <div class="lightning-flash" id="flash"></div>
-
-    <div class="atmosphere-bg"></div>
 
     <div id="youtube-audio" class="hidden">
         <iframe id="audio-player" 
@@ -84,7 +76,7 @@
     </div>
 
     <div id="intro-screen" class="flex flex-col items-center justify-center h-screen w-full relative z-10">
-        <h1 id="friend-name" class="gothic-text text-8xl md:text-9xl mb-8 tracking-wider text-center drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+        <h1 id="friend-name" class="gothic-text text-8xl md:text-9xl mb-8 tracking-wider text-center">
             Jacobus LeRoux
         </h1>
         <button id="enter-btn" class="gothic-text text-3xl opacity-0 cursor-pointer hover:text-purple-400 transition-colors duration-500 tracking-[0.5em]">
@@ -120,15 +112,6 @@
 
         tl.to(".letter", { opacity: 1, filter: "blur(0px)", duration: 1.5, stagger: 0.15, ease: "power2.out" });
         tl.to("#enter-btn", { opacity: 1, y: -10, duration: 2, ease: "sine.inOut" }, "-=0.5");
-
-        // Subtle breathing animation for the name
-        gsap.to("#friend-name", { 
-            filter: "drop-shadow(0 0 25px rgba(168,85,247,0.8))", 
-            duration: 3, 
-            repeat: -1, 
-            yoyo: true, 
-            ease: "sine.inOut" 
-        });
 
         function triggerLightning() {
             setTimeout(() => {
