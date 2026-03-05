@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gothic Birthday</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'OldLondon';
+            src: url('OldLondon.ttf') format('truetype');
+        }
+        body { background-color: #000; overflow: hidden; margin: 0; }
+        .gothic-text { font-family: 'OldLondon', serif; }
+        
+        #speech-text {
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.4);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lightning-flash {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .letter { display: inline-block; opacity: 0; filter: blur(10px); }
+
+        .anime-flame {
+            position: absolute;
+            border-radius: 50% 50% 0 0;
+            transform-origin: bottom center;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+        .anime-spark {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #fff, 0 0 10px #d8b4fe;
+            pointer-events: none;
+            z-index: 30;
+        }
+        .fire-char {
+            font-family: 'OldLondon', serif;
+            transform-origin: bottom center;
+            filter: blur(0.5px);
+        }
+        .fire-word {
+            font-family: 'OldLondon', serif;
+            transform-origin: center center;
+            display: inline-block;
+        }
+        .atmosphere-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1a0524 0%, #000000 70%);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+
+    <div class="lightning-flash" id="flash"></div>
+
+    <div class="atmosphere-bg"></div>
+
+    <div id="youtube-audio" class="hidden">
+        <iframe id="audio-player" 
+                src="https://www.youtube.com/embed/7P7imLdIetg?enablejsapi=1&start=3" 
+                allow="autoplay">
+        </iframe>
+    </div>
+
+    <div id="youtube-sfx" class="hidden">
+        <iframe id="sfx-player" 
+                src="https://www.youtube.com/embed/v3H_X_q6CDE?enablejsapi=1" 
+                allow="autoplay">
+        </iframe>
+    </div>
+
+    <div id="intro-screen" class="flex flex-col items-center justify-center h-screen w-full relative z-10">
+        <h1 id="friend-name" class="gothic-text text-8xl md:text-9xl mb-8 tracking-wider text-center drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+            Jacobus LeRoux
+        </h1>
+        <button id="enter-btn" class="gothic-text text-3xl opacity-0 cursor-pointer hover:text-purple-400 transition-colors duration-500 tracking-[0.5em]">
+            ENTER
+        </button>
+    </div>
+
+    <div id="scene-2" class="fixed inset-0 hidden overflow-hidden bg-black">
+        <img src="bryce1.webp" id="bryce-img" 
+             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] md:w-auto md:h-[85%] opacity-0 filter">
+
+        <div id="bryce-speech" class="absolute top-[15%] right-[5%] w-[35%] opacity-0 z-30 pointer-events-none">
+            <p id="speech-text" class="gothic-text text-xl md:text-3xl text-purple-100 leading-relaxed text-left"></p>
+        </div>
+
+        <img src="jake1.png" id="jake-img" 
+             class="absolute bottom-[-100%] left-10 w-[21%] z-20 filter brightness-75 contrast-125">
+        
+        <div id="magic-glow" class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-purple-900/20 to-transparent opacity-0"></div>
+    </div>
+
+    <div id="final-scene" class="fixed inset-0 flex flex-col items-center justify-center hidden z-50 bg-black">
+        <div id="final-message" class="flex flex-wrap justify-center max-w-5xl px-4 gap-x-6 gap-y-2"></div>
+        <div id="final-age" class="mt-12"></div>
+    </div>
+
+    <script>
+        const nameElement = document.getElementById('friend-name');
+        const text = nameElement.innerText.trim();
+        nameElement.innerHTML = text.split('').map(char => `<span class="letter">${char === ' ' ? '&nbsp;' : char}</span>`).join('');
+
+        const tl = gsap.timeline();
+
+        tl.to(".letter", { opacity: 1, filter: "blur(0px)", duration: 1.5, stagger: 0.15, ease: "power2.out" });
+        tl.to("#enter-btn", { opacity: 1, y: -10, duration: 2, ease: "sine.inOut" }, "-=0.5");
+
+        // Subtle breathing animation for the name
+        gsap.to("#friend-name", { 
+            filter: "drop-shadow(0 0 25px rgba(168,85,247,0.8))", 
+            duration: 3, 
+            repeat: -1, 
+            yoyo: true, 
+            ease: "sine.inOut" 
+        });
+
+        function triggerLightning() {
+            setTimeout(() => {
+                gsap.to("#flash", { opacity: Math.random() * 0.2 + 0.05, duration: 0.05, repeat: 1, yoyo: true, onComplete: triggerLightning });
+            }, Math.random() * 5000 + 2000);
+        }
+        triggerLightning();
+
+        document.getElementById('enter-btn').addEventListener('click', () => {
+            document.getElementById('audio-player').contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            gsap.to("#intro-screen", { opacity: 0, duration: 1.5, onComplete: startScene2 });
+        });
+
+        function startScene2() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('scene-2').classList.remove('hidden');
+            const tl2 = gsap.timeline();
+            tl2.to("#jake-img", { bottom: "0%", duration: 3, ease: "power2.out" });
+            tl2.to("#bryce-img", { opacity: 0.6, duration: 5, ease: "sine.inOut" }, "-=1.5");
+            tl2.to("#bryce-speech", { opacity: 1, duration: 2, ease: "power2.out", onComplete: startSpeechSequence }, "-=2.5");
+            gsap.to("#bryce-img", { scale: 1.03, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
+        }
+
+        function startSpeechSequence() {
+            const sentences = [
+                "Behold, for the veil grows thin on the anniversary of thy naming.",
+                "From the black abyss of the shadow, I have summoned a power that does not sleep.",
+                "I bind these words to thy soul, Jacobus, to shield thy heart and illuminate thy path.",
+                "Step forth without fear, for I have wreathed thee in a fire that the darkness cannot quench."
+            ];
+            const textEl = document.getElementById('speech-text');
+            let index = 0;
+
+            function showNext() {
+                if (index >= sentences.length) {
+                    // FINALE: Fade out Bryce/Speech and bring Jake to Center
+                    gsap.to("#bryce-img", { opacity: 0, duration: 2 });
+                    gsap.to("#bryce-speech", { opacity: 0, duration: 1 });
+                    
+                    gsap.to("#jake-img", {
+                        left: "50%",
+                        bottom: "20%", 
+                        xPercent: -50,
+                        y: 0, // Reset floating 'y' for perfect centering
+                        scale: 1.5,
+                        duration: 3,
+                        ease: "power2.inOut",
+                        onComplete: summonMagicalFlames
+                    });
+                    return;
+                }
+                
+                textEl.innerText = sentences[index];
+                
+                // Rise Jake slightly per sentence (4% increments) [cite: 2025-11-06]
+                gsap.to("#jake-img", {
+                    y: "-=" + (window.innerHeight * 0.04), 
+                    duration: 3,
+                    ease: "power1.inOut"
+                });
+
+                gsap.set(textEl, { opacity: 0, filter: "blur(20px)", y: 20, scale: 0.9, letterSpacing: "5px" });
+                const stl = gsap.timeline();
+                stl.to(textEl, { opacity: 1, filter: "blur(0px)", y: 0, scale: 1, letterSpacing: "0px", duration: 2.5, ease: "power3.out" })
+                   .to({}, { duration: 3.5 }) 
+                   .to(textEl, { opacity: 0, filter: "blur(20px)", y: -80, scale: 1.3, letterSpacing: "15px", duration: 4, ease: "power2.inOut", onComplete: () => { index++; showNext(); } });
+            }
+            showNext();
+        }
+
+        function summonMagicalFlames() {
+            // TRIGGER THE SFX
+            document.getElementById('sfx-player').contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+
+            const jake = document.getElementById('jake-img');
+            const scene = document.getElementById('scene-2');
+            const rect = jake.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const bottomY = rect.bottom;
+            
+            const fireDuration = 6000;
+            const startTime = Date.now();
+
+            function spawnFireParticle() {
+                if (Date.now() - startTime > fireDuration) return;
+                const p = document.createElement('div');
+                p.className = 'anime-flame';
+                const width = Math.random() * (rect.width * 0.4) + 20;
+                const height = Math.random() * (rect.height * 0.8) + 50;
+                p.style.width = width + 'px';
+                p.style.height = height + 'px';
+                p.style.left = (centerX + (Math.random() - 0.5) * rect.width * 1.2) + 'px';
+                p.style.top = (bottomY - 20) + 'px';
+                p.style.zIndex = Math.random() > 0.4 ? 25 : 15;
+                const colors = ['linear-gradient(to top, #ffffff 0%, #d8b4fe 40%, transparent 100%)', 'linear-gradient(to top, #d8b4fe 0%, #7c3aed 50%, transparent 100%)'];
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                scene.appendChild(p);
+                gsap.to(p, { scaleX: Math.random() * 0.5 + 0.5, scaleY: Math.random() * 1.2 + 1, y: -(Math.random() * rect.height * 1.5 + 100), opacity: 0, duration: 0.3, onComplete: () => p.remove() });
+                setTimeout(spawnFireParticle, 10);
+            }
+            spawnFireParticle(); spawnFireParticle();
+
+            gsap.to("#flash", { opacity: 0.8, duration: 0.1, yoyo: true, repeat: 5 });
+            gsap.to("#scene-2", { x: 5, y: 5, duration: 0.05, repeat: 20, yoyo: true });
+            gsap.to(jake, { filter: "brightness(1.5) drop-shadow(0 0 40px #a855f7)", scale: 1.6, duration: 0.1, yoyo: true, repeat: 25 });
+
+            setTimeout(startFinalScene, 6500);
+        }
+
+        function startFinalScene() {
+            gsap.to("#scene-2", { opacity: 0, duration: 2, onComplete: () => {
+                document.getElementById('scene-2').classList.add('hidden');
+                const finalScene = document.getElementById('final-scene');
+                finalScene.classList.remove('hidden');
+                
+                const msgContainer = document.getElementById('final-message');
+                const ageContainer = document.getElementById('final-age');
+                const text = "Happy Birthday my beautiful friend";
+                
+                // Create word elements
+                msgContainer.innerHTML = text.split(' ').map(word => 
+                    `<span class="fire-word text-5xl md:text-7xl opacity-0">${word}</span>`
+                ).join('');
+
+                // Create Age element
+                ageContainer.innerHTML = `<span class="fire-word text-8xl md:text-9xl opacity-0">29</span>`;
+
+                // Continuous fire flickering loop
+                gsap.to(".fire-word", {
+                    color: "#ffff00", 
+                    textShadow: "0 0 5px #fff, 0 -5px 10px #ffeb3b, 0 -10px 20px #ff9800, 0 -15px 30px #f44336",
+                    duration: 0.1, 
+                    repeat: -1, 
+                    yoyo: true, 
+                    stagger: { each: 0.1, from: "random" }
+                });
+
+                // Sequence: Words appear one by one, then the number
+                const tl = gsap.timeline();
+                
+                // Animate words
+                tl.to("#final-message .fire-word", {
+                    opacity: 1,
+                    scale: 1,
+                    filter: "brightness(1) blur(0px)",
+                    duration: 1.5,
+                    stagger: 0.8, // One word at a time
+                    ease: "power2.out",
+                    startAt: { scale: 1.5, filter: "brightness(3) blur(5px)", color: "#fff" }
+                });
+
+                // Animate 29
+                tl.to("#final-age .fire-word", {
+                    opacity: 1,
+                    scale: 1,
+                    filter: "brightness(1) blur(0px)",
+                    duration: 2,
+                    ease: "elastic.out(1, 0.5)",
+                    startAt: { scale: 0.5, filter: "brightness(3) blur(10px)" }
+                });
+            }});
+        }
+    </script>
+</body>
+</html>
